@@ -142,14 +142,20 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	metadata := make(map[string]interface{}, len(plan.Metadata.Elements()))
-	diag := plan.Metadata.ElementsAs(ctx, metadata, false)
+	metadata := make(map[string]string, len(plan.Metadata.Elements()))
+	diag := plan.Metadata.ElementsAs(ctx, &metadata, false)
 	if diag.HasError() {
 		resp.Diagnostics.AddError(
 			"Error converting metadata",
 			"Could not convert metadata elements to string",
 		)
 		return
+	}
+
+	// Convert map[string]string to map[string]interface{} for API
+	metadataInterface := make(map[string]interface{}, len(metadata))
+	for k, v := range metadata {
+		metadataInterface[k] = v
 	}
 
 	// Generate API request body from plan.
@@ -163,7 +169,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	} else {
 		user.Active = plan.Active.ValueBoolPointer()
 	}
-	user.Metadata = metadata
+	user.Metadata = metadataInterface
 
 	tflog.Info(ctx, "Creating a user", map[string]interface{}{"email": plan.Email.ValueString()})
 
