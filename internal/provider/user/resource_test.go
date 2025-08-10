@@ -18,9 +18,9 @@ const testActiveUser = `
 		first_name = "Test"
 		last_name = "User"
 		active = true
-		metadata = \{
-			"role": "test_role"
-		\}
+		metadata = {
+			role = "test_role"
+		}
 	}
 		`
 
@@ -30,9 +30,9 @@ const testUpdatedUser = `
 		first_name = "Updated"
 		last_name = "User"
 		active = true
-		metadata = \{
-			"role": "updated_role"
-		\}
+		metadata = {
+			role = "updated_role"
+		}
 	}
 		`
 
@@ -43,9 +43,9 @@ const testDisabeldUser = `
 		first_name = "Test"
 		last_name = "User"
 		active = false
-		metadata = \{
-			"role": "updated_role"
-		\}
+		metadata = {
+			role = "updated_role"
+		}
 	}
 		`
 
