@@ -158,18 +158,30 @@ func createNewAPIPermissionsSubject(subjectModel permissionSubjectModel) api.Per
 			return api.PermissionsListObjectsPostRequestSubject{}
 		}
 		floatGroupID := float32(groupID) // Our client uses float32 to represent "number" ids.
-		subject.PermissionsListObjectsPostRequestSubjectOneOf = api.NewPermissionsListObjectsPostRequestSubjectOneOf("group", *api.NewNullableFloat32(&floatGroupID))
+		subject.Group = api.NewGroup("group", *api.NewNullableFloat32(&floatGroupID))
 	} else if subjectModel.Type.ValueString() == "user" {
-		subject.PermissionsListObjectsPostRequestSubjectOneOf1 = api.NewPermissionsListObjectsPostRequestSubjectOneOf1("user", subjectModel.ID.ValueString())
+		subject.User = api.NewUser("user", subjectModel.ID.ValueString())
 	}
 	return subject
 }
 
 func createNewAPIPermissionsObject(objectModel permissionObjectModel) api.PermissionsGrantPostRequestObject {
-	object := api.PermissionsGrantPostRequestObject{
-		PermissionsGrantPostRequestObjectOneOf: api.NewPermissionsGrantPostRequestObjectOneOf(objectModel.Type.ValueString(), objectModel.ID.ValueString()),
+	objectType := objectModel.Type.ValueString()
+	objectID := objectModel.ID.ValueString()
+
+	switch objectType {
+	case "app":
+		return api.AppAsPermissionsGrantPostRequestObject(&api.App{Id: objectID})
+	case "folder":
+		return api.FolderAsPermissionsGrantPostRequestObject(&api.Folder{Id: objectID})
+	case "resource":
+		return api.ResourceAsPermissionsGrantPostRequestObject(&api.Resource{Id: objectID})
+	case "resource_configuration":
+		return api.ResourceConfigurationAsPermissionsGrantPostRequestObject(&api.ResourceConfiguration{Id: objectID})
+	default:
+		// Return empty object for unknown types
+		return api.PermissionsGrantPostRequestObject{}
 	}
-	return object
 }
 
 func getPermissionID(subject permissionSubjectModel, object permissionObjectModel) string {

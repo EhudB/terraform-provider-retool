@@ -34,15 +34,15 @@ type userResource struct {
 
 // userResourceModel defines the data model for the User resource.
 type userResourceModel struct {
-	ID                          types.String `tfsdk:"id"`
-	LegacyID                    types.String `tfsdk:"legacy_id"`
-	Email 					 	types.String `tfsdk:"email"`
-	Active          			types.Bool 	 `tfsdk:"active"`
-	CreatedAt				  	types.String `tfsdk:"created_at"`
-	LastActive				  	types.String `tfsdk:"last_active"`
-	FirstName				  	types.String `tfsdk:"first_name"`
-	LastName				    types.String `tfsdk:"last_name"`
-	Metadata				  	types.Map    `tfsdk:"metadata"`
+	ID         types.String `tfsdk:"id"`
+	LegacyID   types.String `tfsdk:"legacy_id"`
+	Email      types.String `tfsdk:"email"`
+	Active     types.Bool   `tfsdk:"active"`
+	CreatedAt  types.String `tfsdk:"created_at"`
+	LastActive types.String `tfsdk:"last_active"`
+	FirstName  types.String `tfsdk:"first_name"`
+	LastName   types.String `tfsdk:"last_name"`
+	Metadata   types.Map    `tfsdk:"metadata"`
 }
 
 // Create new User resource.
@@ -152,7 +152,6 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-
 	// Generate API request body from plan.
 	var user api.UsersPostRequest
 	user.Email = plan.Email.ValueString()
@@ -165,7 +164,6 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		user.Active = plan.Active.ValueBoolPointer()
 	}
 	user.Metadata = metadata
-	
 
 	tflog.Info(ctx, "Creating a user", map[string]interface{}{"email": plan.Email.ValueString()})
 
@@ -180,7 +178,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	if response.Data.Id == "" || response.Data.LegacyId == "" {
+	if response.Data.Id == "" {
 		resp.Diagnostics.AddError(
 			"Error creating user",
 			"Could not create user, unexpected error: missing ID or LegacyID",
@@ -191,7 +189,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	// Map response body to schema and populate Computed attribute values.
 	plan.ID = types.StringValue(response.Data.Id)
-	plan.LegacyID = types.StringValue(response.Data.LegacyId)
+	plan.LegacyID = types.StringValue(utils.Float32PtrToIntString(&response.Data.LegacyId))
 
 	// Set state to fully populated data.
 	diags = resp.State.Set(ctx, plan)
@@ -232,7 +230,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	// Map the API response to the Terraform state.
 	state.ID = types.StringValue(user.Data.Id)
-	state.LegacyID = types.StringValue(user.Data.LegacyId)
+	state.LegacyID = types.StringValue(utils.Float32PtrToIntString(&user.Data.LegacyId))
 	state.Email = types.StringValue(user.Data.Email)
 	state.Active = types.BoolValue(user.Data.Active)
 	state.CreatedAt = types.StringValue(time.Time.String(user.Data.CreatedAt))
@@ -251,7 +249,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	} else {
 		state.LastName = types.StringNull()
 	}
-	
+
 	metadataVal, diag := types.MapValueFrom(ctx, types.StringType, user.Data.Metadata)
 	if diag.HasError() {
 		resp.Diagnostics.Append(diag...)
@@ -276,7 +274,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	return
-	
+
 }
 
 // Delete a User resource.

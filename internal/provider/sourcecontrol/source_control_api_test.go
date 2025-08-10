@@ -11,7 +11,7 @@ import (
 )
 
 func testAppGitHubConfig(t *testing.T, client *api.APIClient) {
-	apiRequestConfigPart := api.SourceControlConfigGet200ResponseDataOneOfConfigOneOf{
+	apiRequestConfigPart := api.GitHubConfigAnyOf{
 		Type:           "App",
 		AppId:          "app_id",
 		InstallationId: "installation_id",
@@ -19,13 +19,13 @@ func testAppGitHubConfig(t *testing.T, client *api.APIClient) {
 	}
 	apiRequest := api.SourceControlConfigPutRequest{
 		Config: api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf: &api.SourceControlConfigGet200ResponseDataOneOf{
+			GitHub: &api.GitHub{
 				Provider:      "GitHub",
 				Org:           "org",
 				Repo:          "repo",
 				DefaultBranch: "default_branch",
-				Config: api.SourceControlConfigGet200ResponseDataOneOfConfig{
-					SourceControlConfigGet200ResponseDataOneOfConfigOneOf: &apiRequestConfigPart,
+				Config: api.GitHubConfig{
+					GitHubConfigAnyOf: &apiRequestConfigPart,
 				},
 			},
 		},
@@ -34,25 +34,25 @@ func testAppGitHubConfig(t *testing.T, client *api.APIClient) {
 	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf.Provider, "GitHub")
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf.Type, "App")
+	assert.Equal(t, response.Data.GitHub.Provider, "GitHub")
+	assert.Equal(t, response.Data.GitHub.Config.GitHubConfigAnyOf.Type, "App")
 	assert.NotNil(t, httpResponse)
 }
 
 func testPersonalGitHubConfig(t *testing.T, client *api.APIClient) {
-	apiRequestConfigPart := api.SourceControlConfigGet200ResponseDataOneOfConfigOneOf1{
+	apiRequestConfigPart := api.GitHubConfigAnyOf1{
 		Type:                "Personal",
 		PersonalAccessToken: "personal_access_token",
 	}
 	apiRequest := api.SourceControlConfigPutRequest{
 		Config: api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf: &api.SourceControlConfigGet200ResponseDataOneOf{
+			GitHub: &api.GitHub{
 				Provider:      "GitHub",
 				Org:           "org",
 				Repo:          "repo",
 				DefaultBranch: "default_branch",
-				Config: api.SourceControlConfigGet200ResponseDataOneOfConfig{
-					SourceControlConfigGet200ResponseDataOneOfConfigOneOf1: &apiRequestConfigPart,
+				Config: api.GitHubConfig{
+					GitHubConfigAnyOf1: &apiRequestConfigPart,
 				},
 			},
 		},
@@ -61,20 +61,20 @@ func testPersonalGitHubConfig(t *testing.T, client *api.APIClient) {
 	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf.Provider, "GitHub")
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf1.Type, "Personal")
+	assert.Equal(t, response.Data.GitHub.Provider, "GitHub")
+	assert.Equal(t, response.Data.GitHub.Config.GitHubConfigAnyOf1.Type, "Personal")
 	assert.NotNil(t, httpResponse)
 }
 
 func testGitLabConfig(t *testing.T, client *api.APIClient) {
 	apiRequest := api.SourceControlConfigPutRequest{
 		Config: api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf1: &api.SourceControlConfigGet200ResponseDataOneOf1{
+			GitLab: &api.GitLab{
 				Provider:      "GitLab",
 				Org:           "org",
 				Repo:          "repo",
 				DefaultBranch: "default_branch",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf1Config{
+				Config: api.GitLabConfig{
 					ProjectId:          1234,
 					Url:                "https://gitlab.com",
 					ProjectAccessToken: "project_access_token",
@@ -86,20 +86,20 @@ func testGitLabConfig(t *testing.T, client *api.APIClient) {
 	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf1.Provider, "GitLab")
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf1.Config.ProjectId, float32(1234))
+	assert.Equal(t, response.Data.GitLab.Provider, "GitLab")
+	assert.Equal(t, response.Data.GitLab.Config.ProjectId, float32(1234))
 	assert.NotNil(t, httpResponse)
 }
 
 func testCodeCommitConfig(t *testing.T, client *api.APIClient) {
 	apiRequest := api.SourceControlConfigPutRequest{
 		Config: api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf2: &api.SourceControlConfigGet200ResponseDataOneOf2{
+			AWSCodeCommit: &api.AWSCodeCommit{
 				Provider:      "AWS CodeCommit",
 				Org:           "org",
 				Repo:          "repo",
 				DefaultBranch: "default_branch",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf2Config{
+				Config: api.AWSCodeCommitConfig{
 					Url:             "https://git-codecommit.us-west-2.amazonaws.com",
 					Region:          "us-west-2",
 					AccessKeyId:     "access_key_id",
@@ -114,22 +114,26 @@ func testCodeCommitConfig(t *testing.T, client *api.APIClient) {
 	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf2.Provider, "AWS CodeCommit")
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf2.Config.Region, "us-west-2")
+	assert.Equal(t, response.Data.AWSCodeCommit.Provider, "AWS CodeCommit")
+	assert.Equal(t, response.Data.AWSCodeCommit.Config.Region, "us-west-2")
 	assert.NotNil(t, httpResponse)
 }
 
-func testBitbucketConfig(t *testing.T, client *api.APIClient) {
+func testBitbucketAppConfig(t *testing.T, client *api.APIClient) {
+	apiRequestConfigPart := api.BitbucketConfigAnyOf{
+		Type:        "App",
+		Username:    "username",
+		AppPassword: "app_password",
+	}
 	apiRequest := api.SourceControlConfigPutRequest{
 		Config: api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf3: &api.SourceControlConfigGet200ResponseDataOneOf3{
+			Bitbucket: &api.Bitbucket{
 				Provider:      "Bitbucket",
 				Org:           "org",
 				Repo:          "repo",
 				DefaultBranch: "default_branch",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf3Config{
-					Username:    "username",
-					AppPassword: "app_password",
+				Config: api.BitbucketConfig{
+					BitbucketConfigAnyOf: &apiRequestConfigPart,
 				},
 			},
 		},
@@ -138,20 +142,47 @@ func testBitbucketConfig(t *testing.T, client *api.APIClient) {
 	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf3.Provider, "Bitbucket")
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf3.Config.Username, "username")
+	assert.Equal(t, response.Data.Bitbucket.Provider, "Bitbucket")
+	assert.Equal(t, response.Data.Bitbucket.Config.BitbucketConfigAnyOf.Type, "App")
+	assert.NotNil(t, httpResponse)
+}
+
+func testBitbucketTokenConfig(t *testing.T, client *api.APIClient) {
+	apiRequestConfigPart := api.BitbucketConfigAnyOf1{
+		Type:  "Token",
+		Token: "personal_access_token",
+	}
+	apiRequest := api.SourceControlConfigPutRequest{
+		Config: api.SourceControlConfigPutRequestConfig{
+			Bitbucket: &api.Bitbucket{
+				Provider:      "Bitbucket",
+				Org:           "org",
+				Repo:          "repo",
+				DefaultBranch: "default_branch",
+				Config: api.BitbucketConfig{
+					BitbucketConfigAnyOf1: &apiRequestConfigPart,
+				},
+			},
+		},
+	}
+
+	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
+	assert.NoError(t, err)
+	assert.NotNil(t, response)
+	assert.Equal(t, response.Data.Bitbucket.Provider, "Bitbucket")
+	assert.Equal(t, response.Data.Bitbucket.Config.BitbucketConfigAnyOf1.Type, "Token")
 	assert.NotNil(t, httpResponse)
 }
 
 func testAzureReposConfig(t *testing.T, client *api.APIClient) {
 	apiRequest := api.SourceControlConfigPutRequest{
 		Config: api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf4: &api.SourceControlConfigGet200ResponseDataOneOf4{
+			AzureRepos: &api.AzureRepos{
 				Provider:      "Azure Repos",
 				Org:           "org",
 				Repo:          "repo",
 				DefaultBranch: "default_branch",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf4Config{
+				Config: api.AzureReposConfig{
 					Url:                 "https://dev.azure.com/organization",
 					Project:             "project",
 					User:                "user",
@@ -165,8 +196,8 @@ func testAzureReposConfig(t *testing.T, client *api.APIClient) {
 	response, httpResponse, err := client.SourceControlAPI.SourceControlConfigPut(context.Background()).SourceControlConfigPutRequest(apiRequest).Execute()
 	assert.NoError(t, err)
 	assert.NotNil(t, response)
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf4.Provider, "Azure Repos")
-	assert.Equal(t, response.Data.SourceControlConfigGet200ResponseDataOneOf4.Config.Url, "https://dev.azure.com/organization")
+	assert.Equal(t, response.Data.AzureRepos.Provider, "Azure Repos")
+	assert.Equal(t, response.Data.AzureRepos.Config.Url, "https://dev.azure.com/organization")
 	assert.NotNil(t, httpResponse)
 }
 
@@ -194,6 +225,7 @@ func TestSourceControlAPI(t *testing.T) {
 	testPersonalGitHubConfig(t, client)
 	testGitLabConfig(t, client)
 	testCodeCommitConfig(t, client)
-	testBitbucketConfig(t, client)
+	testBitbucketAppConfig(t, client)
+	testBitbucketTokenConfig(t, client)
 	testAzureReposConfig(t, client)
 }

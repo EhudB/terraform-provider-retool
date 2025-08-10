@@ -23031,7 +23031,7 @@
             "get": {
                 "summary": "Get environments",
                 "description": "Available from API version 2.4.0+ and onprem version 3.28.0+. Gets a list of environments. The API token must have the \"Environment \u003E Read\" scope.",
-                "tags": ["Environments"],
+                "tags": ["Environment"],
                 "responses": {
                     "200": {
                         "description": "All environments in the org.",
@@ -23120,7 +23120,7 @@
             "post": {
                 "summary": "Create environment",
                 "description": "Available on Retool version 3.123.0+. Creates and returns an environment. The API token must have the \"Environments \u003E Write\" scope.",
-                "tags": ["Environments"],
+                "tags": ["Environment"],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -23237,7 +23237,7 @@
             "get": {
                 "summary": "Get an environment",
                 "description": "Available from API version 2.4.0+ and onprem version 3.28.0+. Returns a single environment of the given uuid. The API token must have the \"Environment \u003E Read\" scope.",
-                "tags": ["Environments"],
+                "tags": ["Environment"],
                 "parameters": [
                     {
                         "schema": {
@@ -23313,7 +23313,7 @@
             "patch": {
                 "summary": "Update an environment",
                 "description": "Available on Retool version 3.123.0+. Update an environment name, description, or color. The API token must have the \"Environments \u003E Write\" scope.",
-                "tags": ["Environments"],
+                "tags": ["Environment"],
                 "parameters": [
                     {
                         "schema": {
@@ -23425,7 +23425,7 @@
             "delete": {
                 "summary": "Delete environment",
                 "description": "Available on Retool version 3.123.0+. Deletes an environment by ID. The API token must have the \"Environments \u003E Write\" scope.",
-                "tags": ["Environments"],
+                "tags": ["Environment"],
                 "parameters": [
                     {
                         "schema": {

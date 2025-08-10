@@ -100,6 +100,7 @@ type bitbucketConfigModel struct {
 	URL              types.String `tfsdk:"url"`
 	EnterpriseAPIURL types.String `tfsdk:"enterprise_api_url"`
 	AppPassword      types.String `tfsdk:"app_password"`
+	Token		   	 types.String `tfsdk:"token"`
 }
 
 func (m bitbucketConfigModel) attributeTypes() map[string]attr.Type {
@@ -392,7 +393,7 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 		if globalDiags.HasError() {
 			return
 		}
-		innerConfig := api.SourceControlConfigGet200ResponseDataOneOfConfig{}
+		innerConfig := api.GitHubConfig{}
 
 		if !utils.IsEmptyObject(githubConfig.AppAuthentication) {
 			var appAuthConfig appAuthConfigModel
@@ -401,7 +402,7 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 			if globalDiags.HasError() {
 				return
 			}
-			innerConfig.SourceControlConfigGet200ResponseDataOneOfConfigOneOf = &api.SourceControlConfigGet200ResponseDataOneOfConfigOneOf{
+			innerConfig.GitHubConfigAnyOf = &api.GitHubConfigAnyOf{
 				Type:             "App",
 				AppId:            appAuthConfig.AppID.ValueString(),
 				InstallationId:   appAuthConfig.InstallationID.ValueString(),
@@ -411,7 +412,7 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 			}
 		} else {
 			// Assuming here that the personal access token is set.
-			innerConfig.SourceControlConfigGet200ResponseDataOneOfConfigOneOf1 = &api.SourceControlConfigGet200ResponseDataOneOfConfigOneOf1{
+			innerConfig.GitHubConfigAnyOf1 = &api.GitHubConfigAnyOf1{
 				Type:                "Personal",
 				PersonalAccessToken: githubConfig.PersonalAccessToken.ValueString(),
 				Url:                 githubConfig.URL.ValueStringPointer(),
@@ -420,7 +421,7 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 		}
 
 		config = api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf: &api.SourceControlConfigGet200ResponseDataOneOf{
+			GitHub: &api.GitHub{
 				Provider:      "GitHub",
 				Config:        innerConfig,
 				Org:           model.Org.ValueString(),
@@ -443,9 +444,9 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 			return
 		}
 		config = api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf1: &api.SourceControlConfigGet200ResponseDataOneOf1{
+			GitLab: &api.GitLab{
 				Provider: "GitLab",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf1Config{
+				Config: api.GitLabConfig{
 					ProjectId:          float32(projectID),
 					Url:                gitlabConfig.URL.ValueString(),
 					ProjectAccessToken: gitlabConfig.ProjectAccessToken.ValueString(),
@@ -465,9 +466,9 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 		}
 
 		config = api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf2: &api.SourceControlConfigGet200ResponseDataOneOf2{
+			AWSCodeCommit: &api.AWSCodeCommit{
 				Provider: "AWS CodeCommit",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf2Config{
+				Config: api.AWSCodeCommitConfig{
 					Url:             awsCodeCommitConfig.URL.ValueString(),
 					Region:          awsCodeCommitConfig.Region.ValueString(),
 					AccessKeyId:     awsCodeCommitConfig.AccessKeyID.ValueString(),
@@ -488,15 +489,32 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 		if globalDiags.HasError() {
 			return
 		}
+
+		innerConfig := api.BitbucketConfig{}
+
+		if bitbucketConfig.Token.ValueString() == "" {
+
+			innerConfig.BitbucketConfigAnyOf = &api.BitbucketConfigAnyOf{
+				Type:             "App",
+				Username:         bitbucketConfig.Username.ValueString(),
+				Url:              bitbucketConfig.URL.ValueStringPointer(),
+				EnterpriseApiUrl: bitbucketConfig.EnterpriseAPIURL.ValueStringPointer(),
+				AppPassword:      bitbucketConfig.AppPassword.ValueString(),
+			}
+		} else {
+			// Assuming here that the personal access token is set.
+			innerConfig.BitbucketConfigAnyOf1 = &api.BitbucketConfigAnyOf1{
+				Type:             "Personal",
+				Token:			  bitbucketConfig.Token.ValueString(),
+				Url:              bitbucketConfig.URL.ValueStringPointer(),
+				EnterpriseApiUrl: bitbucketConfig.EnterpriseAPIURL.ValueStringPointer(),
+			}
+		}
+
 		config = api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf3: &api.SourceControlConfigGet200ResponseDataOneOf3{
+			Bitbucket: &api.Bitbucket{
 				Provider: "Bitbucket",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf3Config{
-					Username:         bitbucketConfig.Username.ValueString(),
-					Url:              bitbucketConfig.URL.ValueStringPointer(),
-					EnterpriseApiUrl: bitbucketConfig.EnterpriseAPIURL.ValueStringPointer(),
-					AppPassword:      bitbucketConfig.AppPassword.ValueString(),
-				},
+				Config: innerConfig,
 				Org:           model.Org.ValueString(),
 				Repo:          model.Repo.ValueString(),
 				DefaultBranch: model.DefaultBranch.ValueString(),
@@ -511,9 +529,9 @@ func updateSourceControlConfig(ctx context.Context, client *api.APIClient, model
 			return
 		}
 		config = api.SourceControlConfigPutRequestConfig{
-			SourceControlConfigGet200ResponseDataOneOf4: &api.SourceControlConfigGet200ResponseDataOneOf4{
+			AzureRepos: &api.AzureRepos{
 				Provider: "Azure Repos",
-				Config: api.SourceControlConfigGet200ResponseDataOneOf4Config{
+				Config: api.AzureReposConfig{
 					Url:                 azureReposConfig.URL.ValueString(),
 					Project:             azureReposConfig.Project.ValueString(),
 					User:                azureReposConfig.User.ValueString(),
@@ -591,17 +609,17 @@ func (r *sourceControlResource) Read(ctx context.Context, _ resource.ReadRequest
 	state.AzureRepos = types.ObjectNull(azureReposConfigModel{}.attributeTypes())
 
 	switch {
-	case response.Data.SourceControlConfigGet200ResponseDataOneOf != nil:
-		state.Org = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Org)
-		state.Repo = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Repo)
-		state.DefaultBranch = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.DefaultBranch)
-		state.RepoVersion = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.RepoVersion)
+	case response.Data.GitHub != nil:
+		state.Org = types.StringValue(response.Data.GitHub.Org)
+		state.Repo = types.StringValue(response.Data.GitHub.Repo)
+		state.DefaultBranch = types.StringValue(response.Data.GitHub.DefaultBranch)
+		state.RepoVersion = types.StringPointerValue(response.Data.GitHub.RepoVersion)
 
 		githubConfigModel := githubConfigModel{}
-		if response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf != nil {
+		if response.Data.GitHub.Config.GitHubConfigAnyOf != nil {
 			appAuthConfig := appAuthConfigModel{
-				AppID:          types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf.AppId),
-				InstallationID: types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf.InstallationId),
+				AppID:          types.StringValue(response.Data.GitHub.Config.GitHubConfigAnyOf.AppId),
+				InstallationID: types.StringValue(response.Data.GitHub.Config.GitHubConfigAnyOf.InstallationId),
 				PrivateKey:     types.StringNull(), // API sends placeholder value that we don't need.
 			}
 			appAuthConfigModelObj, diags := types.ObjectValueFrom(ctx, appAuthConfig.attributeTypes(), appAuthConfig)
@@ -611,13 +629,13 @@ func (r *sourceControlResource) Read(ctx context.Context, _ resource.ReadRequest
 			}
 			githubConfigModel.PersonalAccessToken = types.StringNull()
 			githubConfigModel.AppAuthentication = appAuthConfigModelObj
-			githubConfigModel.URL = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf.Url)
-			githubConfigModel.EnterpriseAPIURL = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf.EnterpriseApiUrl)
+			githubConfigModel.URL = types.StringPointerValue(response.Data.GitHub.Config.GitHubConfigAnyOf.Url)
+			githubConfigModel.EnterpriseAPIURL = types.StringPointerValue(response.Data.GitHub.Config.GitHubConfigAnyOf.EnterpriseApiUrl)
 		} else {
 			githubConfigModel.PersonalAccessToken = types.StringNull() // API sends placeholder value that we don't need.
 			githubConfigModel.AppAuthentication = types.ObjectNull(appAuthConfigModel{}.attributeTypes())
-			githubConfigModel.URL = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf1.Url)
-			githubConfigModel.EnterpriseAPIURL = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf.Config.SourceControlConfigGet200ResponseDataOneOfConfigOneOf1.EnterpriseApiUrl)
+			githubConfigModel.URL = types.StringPointerValue(response.Data.GitHub.Config.GitHubConfigAnyOf1.Url)
+			githubConfigModel.EnterpriseAPIURL = types.StringPointerValue(response.Data.GitHub.Config.GitHubConfigAnyOf1.EnterpriseApiUrl)
 		}
 		githubConfigModelObj, diags := types.ObjectValueFrom(ctx, githubConfigModel.attributeTypes(), githubConfigModel)
 		resp.Diagnostics.Append(diags...)
@@ -626,15 +644,15 @@ func (r *sourceControlResource) Read(ctx context.Context, _ resource.ReadRequest
 		}
 		state.GitHub = githubConfigModelObj
 
-	case response.Data.SourceControlConfigGet200ResponseDataOneOf1 != nil:
-		state.Org = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf1.Org)
-		state.Repo = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf1.Repo)
-		state.DefaultBranch = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf1.DefaultBranch)
-		state.RepoVersion = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf1.RepoVersion)
+	case response.Data.GitLab != nil:
+		state.Org = types.StringValue(response.Data.GitLab.Org)
+		state.Repo = types.StringValue(response.Data.GitLab.Repo)
+		state.DefaultBranch = types.StringValue(response.Data.GitLab.DefaultBranch)
+		state.RepoVersion = types.StringPointerValue(response.Data.GitLab.RepoVersion)
 
 		gitlabConfigModel := gitlabConfigModel{
-			ProjectID:          types.StringValue(utils.Float32PtrToIntString(&response.Data.SourceControlConfigGet200ResponseDataOneOf1.Config.ProjectId)),
-			URL:                types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf1.Config.Url),
+			ProjectID:          types.StringValue(utils.Float32PtrToIntString(&response.Data.GitLab.Config.ProjectId)),
+			URL:                types.StringValue(response.Data.GitLab.Config.Url),
 			ProjectAccessToken: types.StringNull(), // API sends placeholder value that we don't need.
 		}
 		gitlabConfigModelObj, diags := types.ObjectValueFrom(ctx, gitlabConfigModel.attributeTypes(), gitlabConfigModel)
@@ -644,18 +662,18 @@ func (r *sourceControlResource) Read(ctx context.Context, _ resource.ReadRequest
 		}
 		state.GitLab = gitlabConfigModelObj
 
-	case response.Data.SourceControlConfigGet200ResponseDataOneOf2 != nil:
-		state.Org = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.Org)
-		state.Repo = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.Repo)
-		state.DefaultBranch = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.DefaultBranch)
-		state.RepoVersion = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.RepoVersion)
+	case response.Data.AWSCodeCommit != nil:
+		state.Org = types.StringValue(response.Data.AWSCodeCommit.Org)
+		state.Repo = types.StringValue(response.Data.AWSCodeCommit.Repo)
+		state.DefaultBranch = types.StringValue(response.Data.AWSCodeCommit.DefaultBranch)
+		state.RepoVersion = types.StringPointerValue(response.Data.AWSCodeCommit.RepoVersion)
 
 		awsCodeCommitConfigModel := awsCodeCommitConfigModel{
-			URL:             types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.Config.Url),
-			Region:          types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.Config.Region),
+			URL:             types.StringValue(response.Data.AWSCodeCommit.Config.Url),
+			Region:          types.StringValue(response.Data.AWSCodeCommit.Config.Region),
 			AccessKeyID:     types.StringNull(), // API sends placeholder value that we don't need.
 			SecretAccessKey: types.StringNull(), // API sends placeholder value that we don't need,.
-			HTTPSUsername:   types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf2.Config.HttpsUsername),
+			HTTPSUsername:   types.StringValue(response.Data.AWSCodeCommit.Config.HttpsUsername),
 			HTTPSPassword:   types.StringNull(), // API sends placeholder value that we don't need.
 		}
 		awsCodeCommitConfigModelObj, diags := types.ObjectValueFrom(ctx, awsCodeCommitConfigModel.attributeTypes(), awsCodeCommitConfigModel)
@@ -665,18 +683,32 @@ func (r *sourceControlResource) Read(ctx context.Context, _ resource.ReadRequest
 		}
 		state.AWSCodeCommit = awsCodeCommitConfigModelObj
 
-	case response.Data.SourceControlConfigGet200ResponseDataOneOf3 != nil:
-		state.Org = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.Org)
-		state.Repo = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.Repo)
-		state.DefaultBranch = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.DefaultBranch)
-		state.RepoVersion = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.RepoVersion)
+	case response.Data.Bitbucket != nil:
+		state.Org = types.StringValue(response.Data.Bitbucket.Org)
+		state.Repo = types.StringValue(response.Data.Bitbucket.Repo)
+		state.DefaultBranch = types.StringValue(response.Data.Bitbucket.DefaultBranch)
+		state.RepoVersion = types.StringPointerValue(response.Data.Bitbucket.RepoVersion)
 
-		bitbucketConfigModel := bitbucketConfigModel{
-			Username:         types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.Config.Username),
-			URL:              types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.Config.Url),
-			EnterpriseAPIURL: types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf3.Config.EnterpriseApiUrl),
-			AppPassword:      types.StringNull(), // API sends placeholder value that we don't need.
+		bitbucketConfigModel := bitbucketConfigModel{}
+		if response.Data.Bitbucket.Config.BitbucketConfigAnyOf != nil {
+			bitbucketConfigModel.Username = types.StringValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf.Username)
+			bitbucketConfigModel.URL = types.StringPointerValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf.Url)
+			bitbucketConfigModel.EnterpriseAPIURL = types.StringPointerValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf.EnterpriseApiUrl)
+			bitbucketConfigModel.AppPassword = types.StringValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf.AppPassword)
+		} else {
+			bitbucketConfigModel.Username = types.StringNull()
+			bitbucketConfigModel.URL = types.StringPointerValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf.Url)
+			bitbucketConfigModel.EnterpriseAPIURL = types.StringPointerValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf.EnterpriseApiUrl)
+			bitbucketConfigModel.AppPassword = types.StringNull()
+			bitbucketConfigModel.Token = types.StringValue(response.Data.Bitbucket.Config.BitbucketConfigAnyOf1.Token)
 		}
+
+		// bitbucketConfigModel := bitbucketConfigModel{
+		// 	Username:         types.StringValue(response.Data.Bitbucket.Config.Username),
+		// 	URL:              types.StringPointerValue(response.Data.Bitbucket.Config.Url),
+		// 	EnterpriseAPIURL: types.StringPointerValue(response.Data.Bitbucket.Config.EnterpriseApiUrl),
+		// 	AppPassword:      types.StringNull(), // API sends placeholder value that we don't need.
+		// }
 		bitbucketConfigModelObj, diags := types.ObjectValueFrom(ctx, bitbucketConfigModel.attributeTypes(), bitbucketConfigModel)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -684,18 +716,18 @@ func (r *sourceControlResource) Read(ctx context.Context, _ resource.ReadRequest
 		}
 		state.Bitbucket = bitbucketConfigModelObj
 
-	case response.Data.SourceControlConfigGet200ResponseDataOneOf4 != nil:
-		state.Org = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.Org)
-		state.Repo = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.Repo)
-		state.DefaultBranch = types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.DefaultBranch)
-		state.RepoVersion = types.StringPointerValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.RepoVersion)
+	case response.Data.AzureRepos != nil:
+		state.Org = types.StringValue(response.Data.AzureRepos.Org)
+		state.Repo = types.StringValue(response.Data.AzureRepos.Repo)
+		state.DefaultBranch = types.StringValue(response.Data.AzureRepos.DefaultBranch)
+		state.RepoVersion = types.StringPointerValue(response.Data.AzureRepos.RepoVersion)
 
 		azureReposConfigModel := azureReposConfigModel{
-			URL:                 types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.Config.Url),
-			Project:             types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.Config.Project),
-			User:                types.StringValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.Config.User),
+			URL:                 types.StringValue(response.Data.AzureRepos.Config.Url),
+			Project:             types.StringValue(response.Data.AzureRepos.Config.Project),
+			User:                types.StringValue(response.Data.AzureRepos.Config.User),
 			PersonalAccessToken: types.StringNull(), // API sends placeholder value that we don't need.
-			UseBasicAuth:        types.BoolValue(response.Data.SourceControlConfigGet200ResponseDataOneOf4.Config.UseBasicAuth),
+			UseBasicAuth:        types.BoolValue(response.Data.AzureRepos.Config.UseBasicAuth),
 		}
 		azureReposConfigModelObj, diags := types.ObjectValueFrom(ctx, azureReposConfigModel.attributeTypes(), azureReposConfigModel)
 		resp.Diagnostics.Append(diags...)

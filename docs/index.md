@@ -57,6 +57,17 @@ resource "retool_permissions" "production_apps_users" {
     }
   ]
 }
+
+# Create a user
+resource "retool_user" "example" {
+  email      = "test@example.com"
+  first_name = "Test"
+  last_name  = "User"
+  active     = true
+  metadata = {
+    role = "test_role"
+  }
+}
 ```
 
 ~> Hard-coding credentials into any Terraform configuration is not recommended, and risks secret leakage should this

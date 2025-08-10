@@ -4,10 +4,84 @@ All URIs are relative to *http://.*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**PermissionsAccessListObjectTypeObjectIdGet**](PermissionsAPI.md#PermissionsAccessListObjectTypeObjectIdGet) | **Get** /permissions/accessList/{objectType}/{objectId} | Get the access list of an app or folder
 [**PermissionsGrantPost**](PermissionsAPI.md#PermissionsGrantPost) | **Post** /permissions/grant | Grant permissions
 [**PermissionsListObjectsPost**](PermissionsAPI.md#PermissionsListObjectsPost) | **Post** /permissions/listObjects | List objects a group can access
 [**PermissionsRevokePost**](PermissionsAPI.md#PermissionsRevokePost) | **Post** /permissions/revoke | Revoke permissions
 
+
+
+## PermissionsAccessListObjectTypeObjectIdGet
+
+> PermissionsAccessListObjectTypeObjectIdGet200Response PermissionsAccessListObjectTypeObjectIdGet(ctx, objectId, objectType).Execute()
+
+Get the access list of an app or folder
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	objectId := "objectId_example" // string | 
+	objectType := "objectType_example" // string | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PermissionsAPI.PermissionsAccessListObjectTypeObjectIdGet(context.Background(), objectId, objectType).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PermissionsAPI.PermissionsAccessListObjectTypeObjectIdGet``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PermissionsAccessListObjectTypeObjectIdGet`: PermissionsAccessListObjectTypeObjectIdGet200Response
+	fmt.Fprintf(os.Stdout, "Response from `PermissionsAPI.PermissionsAccessListObjectTypeObjectIdGet`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**objectId** | **string** |  | 
+**objectType** | **string** |  | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPermissionsAccessListObjectTypeObjectIdGetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+[**PermissionsAccessListObjectTypeObjectIdGet200Response**](PermissionsAccessListObjectTypeObjectIdGet200Response.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## PermissionsGrantPost
@@ -31,7 +105,7 @@ import (
 )
 
 func main() {
-	permissionsGrantPostRequest := *openapiclient.NewPermissionsGrantPostRequest(openapiclient._permissions_listObjects_post_request_subject{PermissionsListObjectsPostRequestSubjectOneOf: openapiclient.NewPermissionsListObjectsPostRequestSubjectOneOf("Type_example", NullableFloat32(123))}, openapiclient._permissions_grant_post_request_object{PermissionsGrantPostRequestObjectOneOf: openapiclient.NewPermissionsGrantPostRequestObjectOneOf("Type_example", "Id_example")}, "AccessLevel_example") // PermissionsGrantPostRequest |  (optional)
+	permissionsGrantPostRequest := *openapiclient.NewPermissionsGrantPostRequest(openapiclient._permissions_listObjects_post_request_subject{Group: openapiclient.NewGroup("Type_example", NullableFloat32(123))}, openapiclient._permissions_grant_post_request_object{App: openapiclient.NewApp("Type_example", "Id_example")}, "AccessLevel_example") // PermissionsGrantPostRequest |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -97,7 +171,7 @@ import (
 )
 
 func main() {
-	permissionsListObjectsPostRequest := *openapiclient.NewPermissionsListObjectsPostRequest(openapiclient._permissions_listObjects_post_request_subject{PermissionsListObjectsPostRequestSubjectOneOf: openapiclient.NewPermissionsListObjectsPostRequestSubjectOneOf("Type_example", NullableFloat32(123))}, "ObjectType_example") // PermissionsListObjectsPostRequest |  (optional)
+	permissionsListObjectsPostRequest := *openapiclient.NewPermissionsListObjectsPostRequest(openapiclient._permissions_listObjects_post_request_subject{Group: openapiclient.NewGroup("Type_example", NullableFloat32(123))}, "ObjectType_example") // PermissionsListObjectsPostRequest |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -144,7 +218,7 @@ Name | Type | Description  | Notes
 
 ## PermissionsRevokePost
 
-> PermissionsRevokePost200Response PermissionsRevokePost(ctx).PermissionsRevokePostRequest(permissionsRevokePostRequest).Execute()
+> PermissionsListObjectsPost200Response PermissionsRevokePost(ctx).PermissionsRevokePostRequest(permissionsRevokePostRequest).Execute()
 
 Revoke permissions
 
@@ -163,7 +237,7 @@ import (
 )
 
 func main() {
-	permissionsRevokePostRequest := *openapiclient.NewPermissionsRevokePostRequest(openapiclient._permissions_listObjects_post_request_subject{PermissionsListObjectsPostRequestSubjectOneOf: openapiclient.NewPermissionsListObjectsPostRequestSubjectOneOf("Type_example", NullableFloat32(123))}, openapiclient._permissions_grant_post_request_object{PermissionsGrantPostRequestObjectOneOf: openapiclient.NewPermissionsGrantPostRequestObjectOneOf("Type_example", "Id_example")}) // PermissionsRevokePostRequest |  (optional)
+	permissionsRevokePostRequest := *openapiclient.NewPermissionsRevokePostRequest(openapiclient._permissions_listObjects_post_request_subject{Group: openapiclient.NewGroup("Type_example", NullableFloat32(123))}, openapiclient._permissions_grant_post_request_object{App: openapiclient.NewApp("Type_example", "Id_example")}) // PermissionsRevokePostRequest |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -172,7 +246,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `PermissionsAPI.PermissionsRevokePost``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `PermissionsRevokePost`: PermissionsRevokePost200Response
+	// response from `PermissionsRevokePost`: PermissionsListObjectsPost200Response
 	fmt.Fprintf(os.Stdout, "Response from `PermissionsAPI.PermissionsRevokePost`: %v\n", resp)
 }
 ```
@@ -192,7 +266,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**PermissionsRevokePost200Response**](PermissionsRevokePost200Response.md)
+[**PermissionsListObjectsPost200Response**](PermissionsListObjectsPost200Response.md)
 
 ### Authorization
 
