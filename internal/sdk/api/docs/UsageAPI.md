@@ -36,7 +36,7 @@ import (
 func main() {
 	startDate := "2024-01-15" // string | 
 	appName := "appName_example" // string | 
-	orgIds := "org_id1,org_id2" // string |  (optional)
+	orgIds := []string{"Inner_example"} // []string |  (optional)
 	endDate := "2024-01-30" // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -64,7 +64,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **startDate** | **string** |  | 
  **appName** | **string** |  | 
- **orgIds** | **string** |  | 
+ **orgIds** | **[]string** |  | 
  **endDate** | **string** |  | 
 
 ### Return type
@@ -107,7 +107,7 @@ import (
 
 func main() {
 	startDate := "2024-01-15" // string | 
-	orgIds := "org_id1,org_id2" // string |  (optional)
+	orgIds := []string{"Inner_example"} // []string |  (optional)
 	endDate := "2024-01-30" // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -134,7 +134,7 @@ Other parameters are passed through a pointer to a apiUsageAppSummaryGetRequest 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **startDate** | **string** |  | 
- **orgIds** | **string** |  | 
+ **orgIds** | **[]string** |  | 
  **endDate** | **string** |  | 
 
 ### Return type
@@ -177,7 +177,7 @@ import (
 
 func main() {
 	startDate := "2024-01-15" // string | 
-	orgIds := "org_id1,org_id2" // string |  (optional)
+	orgIds := []string{"Inner_example"} // []string |  (optional)
 	endDate := "2024-01-30" // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -204,7 +204,7 @@ Other parameters are passed through a pointer to a apiUsageGetRequest struct via
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **startDate** | **string** |  | 
- **orgIds** | **string** |  | 
+ **orgIds** | **[]string** |  | 
  **endDate** | **string** |  | 
 
 ### Return type
@@ -309,7 +309,7 @@ import (
 func main() {
 	startDate := "2024-01-15" // string | 
 	email := "email_example" // string | 
-	orgIds := "org_id1,org_id2" // string |  (optional)
+	orgIds := []string{"Inner_example"} // []string |  (optional)
 	endDate := "2024-01-30" // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -337,7 +337,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **startDate** | **string** |  | 
  **email** | **string** |  | 
- **orgIds** | **string** |  | 
+ **orgIds** | **[]string** |  | 
  **endDate** | **string** |  | 
 
 ### Return type
@@ -380,7 +380,7 @@ import (
 
 func main() {
 	startDate := "2024-01-15" // string | 
-	orgIds := "org_id1,org_id2" // string |  (optional)
+	orgIds := []string{"Inner_example"} // []string |  (optional)
 	endDate := "2024-01-30" // string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
@@ -407,7 +407,7 @@ Other parameters are passed through a pointer to a apiUsageUserSummaryGetRequest
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **startDate** | **string** |  | 
- **orgIds** | **string** |  | 
+ **orgIds** | **[]string** |  | 
  **endDate** | **string** |  | 
 
 ### Return type

@@ -4,14 +4,17 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Type** | **string** |  | 
-**Id** | **string** | The uuid or name for the resource. | 
+**Id** | [**ResourcesGet200ResponseDataInnerId**](ResourcesGet200ResponseDataInnerId.md) |  | 
+**Type** | **string** | The type of resource. | 
+**DisplayName** | **string** |  | 
+**CreatedAt** | **string** |  | 
+**UpdatedAt** | **string** |  | 
 
 ## Methods
 
 ### NewResource
 
-`func NewResource(type_ string, id string, ) *Resource`
+`func NewResource(id ResourcesGet200ResponseDataInnerId, type_ string, displayName string, createdAt string, updatedAt string, ) *Resource`
 
 NewResource instantiates a new Resource object
 This constructor will assign default values to properties that have it defined,
@@ -25,6 +28,26 @@ will change when the set of required properties is changed
 NewResourceWithDefaults instantiates a new Resource object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetId
+
+`func (o *Resource) GetId() ResourcesGet200ResponseDataInnerId`
+
+GetId returns the Id field if non-nil, zero value otherwise.
+
+### GetIdOk
+
+`func (o *Resource) GetIdOk() (*ResourcesGet200ResponseDataInnerId, bool)`
+
+GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetId
+
+`func (o *Resource) SetId(v ResourcesGet200ResponseDataInnerId)`
+
+SetId sets Id field to given value.
+
 
 ### GetType
 
@@ -46,24 +69,64 @@ and a boolean to check if the value has been set.
 SetType sets Type field to given value.
 
 
-### GetId
+### GetDisplayName
 
-`func (o *Resource) GetId() string`
+`func (o *Resource) GetDisplayName() string`
 
-GetId returns the Id field if non-nil, zero value otherwise.
+GetDisplayName returns the DisplayName field if non-nil, zero value otherwise.
 
-### GetIdOk
+### GetDisplayNameOk
 
-`func (o *Resource) GetIdOk() (*string, bool)`
+`func (o *Resource) GetDisplayNameOk() (*string, bool)`
 
-GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
+GetDisplayNameOk returns a tuple with the DisplayName field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetId
+### SetDisplayName
 
-`func (o *Resource) SetId(v string)`
+`func (o *Resource) SetDisplayName(v string)`
 
-SetId sets Id field to given value.
+SetDisplayName sets DisplayName field to given value.
+
+
+### GetCreatedAt
+
+`func (o *Resource) GetCreatedAt() string`
+
+GetCreatedAt returns the CreatedAt field if non-nil, zero value otherwise.
+
+### GetCreatedAtOk
+
+`func (o *Resource) GetCreatedAtOk() (*string, bool)`
+
+GetCreatedAtOk returns a tuple with the CreatedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCreatedAt
+
+`func (o *Resource) SetCreatedAt(v string)`
+
+SetCreatedAt sets CreatedAt field to given value.
+
+
+### GetUpdatedAt
+
+`func (o *Resource) GetUpdatedAt() string`
+
+GetUpdatedAt returns the UpdatedAt field if non-nil, zero value otherwise.
+
+### GetUpdatedAtOk
+
+`func (o *Resource) GetUpdatedAtOk() (*string, bool)`
+
+GetUpdatedAtOk returns a tuple with the UpdatedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUpdatedAt
+
+`func (o *Resource) SetUpdatedAt(v string)`
+
+SetUpdatedAt sets UpdatedAt field to given value.
 
 
 

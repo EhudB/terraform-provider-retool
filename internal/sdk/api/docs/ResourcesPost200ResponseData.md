@@ -4,10 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | The uuid or name for the resource. | 
+**Id** | [**ResourcesGet200ResponseDataInnerId**](ResourcesGet200ResponseDataInnerId.md) |  | 
 **Type** | **string** | The type of resource. | 
 **DisplayName** | **string** |  | 
-**Protected** | **bool** | Whether the resource is protected in source control | 
 **CreatedAt** | **string** |  | 
 **UpdatedAt** | **string** |  | 
 
@@ -15,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewResourcesPost200ResponseData
 
-`func NewResourcesPost200ResponseData(id string, type_ string, displayName string, protected bool, createdAt string, updatedAt string, ) *ResourcesPost200ResponseData`
+`func NewResourcesPost200ResponseData(id ResourcesGet200ResponseDataInnerId, type_ string, displayName string, createdAt string, updatedAt string, ) *ResourcesPost200ResponseData`
 
 NewResourcesPost200ResponseData instantiates a new ResourcesPost200ResponseData object
 This constructor will assign default values to properties that have it defined,
@@ -32,20 +31,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetId
 
-`func (o *ResourcesPost200ResponseData) GetId() string`
+`func (o *ResourcesPost200ResponseData) GetId() ResourcesGet200ResponseDataInnerId`
 
 GetId returns the Id field if non-nil, zero value otherwise.
 
 ### GetIdOk
 
-`func (o *ResourcesPost200ResponseData) GetIdOk() (*string, bool)`
+`func (o *ResourcesPost200ResponseData) GetIdOk() (*ResourcesGet200ResponseDataInnerId, bool)`
 
 GetIdOk returns a tuple with the Id field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetId
 
-`func (o *ResourcesPost200ResponseData) SetId(v string)`
+`func (o *ResourcesPost200ResponseData) SetId(v ResourcesGet200ResponseDataInnerId)`
 
 SetId sets Id field to given value.
 
@@ -88,26 +87,6 @@ and a boolean to check if the value has been set.
 `func (o *ResourcesPost200ResponseData) SetDisplayName(v string)`
 
 SetDisplayName sets DisplayName field to given value.
-
-
-### GetProtected
-
-`func (o *ResourcesPost200ResponseData) GetProtected() bool`
-
-GetProtected returns the Protected field if non-nil, zero value otherwise.
-
-### GetProtectedOk
-
-`func (o *ResourcesPost200ResponseData) GetProtectedOk() (*bool, bool)`
-
-GetProtectedOk returns a tuple with the Protected field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProtected
-
-`func (o *ResourcesPost200ResponseData) SetProtected(v bool)`
-
-SetProtected sets Protected field to given value.
 
 
 ### GetCreatedAt

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Config** | [**AzureReposConfig**](AzureReposConfig.md) |  | 
+**Config** | [**SourceControlConfigGet200ResponseDataOneOf4Config**](SourceControlConfigGet200ResponseDataOneOf4Config.md) |  | 
 **Provider** | **string** |  | 
 **Org** | **string** | The user or organization to which the repository belongs to. | 
 **Repo** | **string** | The name of the repository you created to use with Retool. | 
@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 
 ### NewSourceControlConfigPutRequestConfig
 
-`func NewSourceControlConfigPutRequestConfig(config AzureReposConfig, provider string, org string, repo string, defaultBranch string, ) *SourceControlConfigPutRequestConfig`
+`func NewSourceControlConfigPutRequestConfig(config SourceControlConfigGet200ResponseDataOneOf4Config, provider string, org string, repo string, defaultBranch string, ) *SourceControlConfigPutRequestConfig`
 
 NewSourceControlConfigPutRequestConfig instantiates a new SourceControlConfigPutRequestConfig object
 This constructor will assign default values to properties that have it defined,
@@ -32,20 +32,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetConfig
 
-`func (o *SourceControlConfigPutRequestConfig) GetConfig() AzureReposConfig`
+`func (o *SourceControlConfigPutRequestConfig) GetConfig() SourceControlConfigGet200ResponseDataOneOf4Config`
 
 GetConfig returns the Config field if non-nil, zero value otherwise.
 
 ### GetConfigOk
 
-`func (o *SourceControlConfigPutRequestConfig) GetConfigOk() (*AzureReposConfig, bool)`
+`func (o *SourceControlConfigPutRequestConfig) GetConfigOk() (*SourceControlConfigGet200ResponseDataOneOf4Config, bool)`
 
 GetConfigOk returns a tuple with the Config field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetConfig
 
-`func (o *SourceControlConfigPutRequestConfig) SetConfig(v AzureReposConfig)`
+`func (o *SourceControlConfigPutRequestConfig) SetConfig(v SourceControlConfigGet200ResponseDataOneOf4Config)`
 
 SetConfig sets Config field to given value.
 

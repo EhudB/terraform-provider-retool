@@ -8,7 +8,6 @@ Method | HTTP request | Description
 [**ResourcesPost**](ResourcesAPI.md#ResourcesPost) | **Post** /resources | Create a resource
 [**ResourcesResourceIdDelete**](ResourcesAPI.md#ResourcesResourceIdDelete) | **Delete** /resources/{resourceId} | Delete resource
 [**ResourcesResourceIdGet**](ResourcesAPI.md#ResourcesResourceIdGet) | **Get** /resources/{resourceId} | Get resource by id
-[**ResourcesResourceIdPatch**](ResourcesAPI.md#ResourcesResourceIdPatch) | **Patch** /resources/{resourceId} | Update a resource
 
 
 
@@ -148,7 +147,7 @@ Name | Type | Description  | Notes
 
 ## ResourcesResourceIdDelete
 
-> ResourcesResourceIdDelete(ctx, resourceId).DeleteUnderlyingDB(deleteUnderlyingDB).Execute()
+> ResourcesResourceIdDelete(ctx, resourceId).Execute()
 
 Delete resource
 
@@ -167,12 +166,11 @@ import (
 )
 
 func main() {
-	resourceId := "resourceId_example" // string | 
-	deleteUnderlyingDB := true // bool |  (optional)
+	resourceId := *openapiclient.NewResourcesGet200ResponseDataInnerId() // ResourcesGet200ResponseDataInnerId | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ResourcesAPI.ResourcesResourceIdDelete(context.Background(), resourceId).DeleteUnderlyingDB(deleteUnderlyingDB).Execute()
+	r, err := apiClient.ResourcesAPI.ResourcesResourceIdDelete(context.Background(), resourceId).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ResourcesAPI.ResourcesResourceIdDelete``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -186,7 +184,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**resourceId** | **string** |  | 
+**resourceId** | [**ResourcesGet200ResponseDataInnerId**](.md) |  | 
 
 ### Other Parameters
 
@@ -196,7 +194,6 @@ Other parameters are passed through a pointer to a apiResourcesResourceIdDeleteR
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **deleteUnderlyingDB** | **bool** |  | 
 
 ### Return type
 
@@ -237,7 +234,7 @@ import (
 )
 
 func main() {
-	resourceId := "resourceId_example" // string | 
+	resourceId := *openapiclient.NewResourcesGet200ResponseDataInnerId() // ResourcesGet200ResponseDataInnerId | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -257,7 +254,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**resourceId** | **string** |  | 
+**resourceId** | [**ResourcesGet200ResponseDataInnerId**](.md) |  | 
 
 ### Other Parameters
 
@@ -279,78 +276,6 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## ResourcesResourceIdPatch
-
-> ResourcesResourceIdPatch200Response ResourcesResourceIdPatch(ctx, resourceId).ResourcesResourceIdPatchRequest(resourcesResourceIdPatchRequest).Execute()
-
-Update a resource
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
-)
-
-func main() {
-	resourceId := "resourceId_example" // string | 
-	resourcesResourceIdPatchRequest := *openapiclient.NewResourcesResourceIdPatchRequest([]openapiclient.ReplaceOperation{*openapiclient.NewReplaceOperation("Op_example", "Path_example")}) // ResourcesResourceIdPatchRequest |  (optional)
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ResourcesAPI.ResourcesResourceIdPatch(context.Background(), resourceId).ResourcesResourceIdPatchRequest(resourcesResourceIdPatchRequest).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ResourcesAPI.ResourcesResourceIdPatch``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `ResourcesResourceIdPatch`: ResourcesResourceIdPatch200Response
-	fmt.Fprintf(os.Stdout, "Response from `ResourcesAPI.ResourcesResourceIdPatch`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**resourceId** | **string** |  | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiResourcesResourceIdPatchRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **resourcesResourceIdPatchRequest** | [**ResourcesResourceIdPatchRequest**](ResourcesResourceIdPatchRequest.md) |  | 
-
-### Return type
-
-[**ResourcesResourceIdPatch200Response**](ResourcesResourceIdPatch200Response.md)
-
-### Authorization
-
-[BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
-- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
