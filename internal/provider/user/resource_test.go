@@ -19,7 +19,7 @@ const testActiveUser = `
 		last_name = "User"
 		active = true
 		metadata = {
-			role = "test_role"
+			"role" = "test_role"
 		}
 	}
 		`
