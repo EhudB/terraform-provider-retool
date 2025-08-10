@@ -701,7 +701,16 @@ func (r *ssoResource) updateSSOConfig(ctx context.Context, plan ssoResourceModel
 		return nil
 	}
 	secrets := &encryptedSecrets{}
+
 	switch {
+	case response.Data.Google != nil:
+		tflog.Info(ctx, "Google SSO config created")
+		secrets = &encryptedSecrets{
+			googleClientSecret:    &response.Data.Google.GoogleClientSecret,
+			oidcClientSecret:      nil,
+			ldapServerKey:         nil,
+			ldapServerCertificate: nil,
+		}
 	case response.Data.GoogleSAML != nil:
 		tflog.Info(ctx, "Google SAML SSO config created")
 		secrets = &encryptedSecrets{
@@ -835,15 +844,6 @@ func parseLdapRolesMappingValue(ctx context.Context, rolesMappingValue string) m
 	return rolesMapping
 }
 
-// Check if any of the LDAP config attributes are present.
-func isLdapConfigPresent(ssoConfig *api.SSOConfig) bool {
-	return ssoConfig.LdapServerUrl != nil ||
-		ssoConfig.LdapBaseDomainComponents != nil ||
-		ssoConfig.LdapServerName != nil ||
-		ssoConfig.LdapServerKey != nil ||
-		ssoConfig.LdapServerCertificate != nil
-}
-
 // Read SSO config.
 func (r *ssoResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state ssoResourceModel
@@ -893,48 +893,174 @@ func (r *ssoResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		state.Google = googleConfigObject
 	case response.Data.GoogleOIDC != nil:
 		state.DisableEmailPasswordLogin = types.BoolValue(response.Data.GoogleOIDC.DisableEmailPasswordLogin)
-		googleOIDCConfig := googleConfigModel{
+
+		// Fill Google config
+		googleConfig := googleConfigModel{
 			ClientID:              types.StringValue(response.Data.GoogleOIDC.GoogleClientId),
 			EncryptedClientSecret: types.StringValue(response.Data.GoogleOIDC.GoogleClientSecret),
 		}
-		googleOIDCConfig.ClientSecret = getSecretValue(
+		googleConfig.ClientSecret = getSecretValue(
 			ctx,
 			&resp.State,
-			googleOIDCConfig.EncryptedClientSecret,
+			googleConfig.EncryptedClientSecret,
 			path.Root("google").AtName("client_secret"),
 			path.Root("google").AtName("encrypted_client_secret"),
 			&resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		googleOIDCConfigObject, diags := types.ObjectValueFrom(ctx, googleOIDCConfig.attributeTypes(), googleOIDCConfig)
+		googleConfigObject, diags := types.ObjectValueFrom(ctx, googleConfig.attributeTypes(), googleConfig)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		state.Google = googleOIDCConfigObject
+		state.Google = googleConfigObject
+
+		// Fill OIDC config
+		oidcConfig := oidcConfigModel{
+			ClientID:                  types.StringValue(response.Data.GoogleOIDC.OidcClientId),
+			EncryptedClientSecret:     types.StringValue(response.Data.GoogleOIDC.OidcClientSecret),
+			Scopes:                    types.StringValue(response.Data.GoogleOIDC.OidcScopes),
+			AuthURL:                   types.StringValue(response.Data.GoogleOIDC.OidcAuthUrl),
+			TokenURL:                  types.StringValue(response.Data.GoogleOIDC.OidcTokenUrl),
+			UserInfoURL:               types.StringPointerValue(response.Data.GoogleOIDC.OidcUserinfoUrl),
+			Audience:                  types.StringPointerValue(response.Data.GoogleOIDC.OidcAudience),
+			JWTEmailKey:               types.StringValue(response.Data.GoogleOIDC.JwtEmailKey),
+			JWTRolesKey:               types.StringPointerValue(response.Data.GoogleOIDC.JwtRolesKey),
+			JWTFirstNameKey:           types.StringValue(response.Data.GoogleOIDC.JwtFirstNameKey),
+			JWTLastNameKey:            types.StringValue(response.Data.GoogleOIDC.JwtLastNameKey),
+			TriggerLoginAutomatically: types.BoolValue(response.Data.GoogleOIDC.TriggerLoginAutomatically),
+			JITEnabled:                types.BoolValue(response.Data.GoogleOIDC.JitEnabled),
+		}
+		oidcConfig.ClientSecret = getSecretValue(
+			ctx,
+			&resp.State,
+			oidcConfig.EncryptedClientSecret,
+			path.Root("oidc").AtName("client_secret"),
+			path.Root("oidc").AtName("encrypted_client_secret"),
+			&resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if response.Data.GoogleOIDC.RolesMapping != nil {
+			roleMapTuples := strings.Split(*response.Data.GoogleOIDC.RolesMapping, ",")
+			rolesMapping := make(map[string]types.String, len(roleMapTuples))
+			for _, roleMapping := range roleMapTuples {
+				roleMappingParts := strings.Split(roleMapping, "->")
+				if len(roleMappingParts) != 2 {
+					tflog.Warn(ctx, "Invalid role mapping: "+roleMapping)
+					continue
+				}
+				rolesMapping[strings.TrimSpace(roleMappingParts[0])] = types.StringValue(strings.TrimSpace(roleMappingParts[1]))
+			}
+			oidcConfig.RolesMapping, diags = types.MapValueFrom(ctx, types.StringType, rolesMapping)
+			resp.Diagnostics.Append(diags...)
+		} else {
+			oidcConfig.RolesMapping = types.MapNull(types.StringType)
+		}
+
+		if response.Data.GoogleOIDC.RestrictedDomain != nil {
+			restrictedDomains := strings.Split(*response.Data.GoogleOIDC.RestrictedDomain, ",")
+			oidcConfig.RestrictedDomains, diags = types.ListValueFrom(ctx, types.StringType, restrictedDomains)
+			resp.Diagnostics.Append(diags...)
+		} else {
+			oidcConfig.RestrictedDomains = types.ListNull(types.StringType)
+		}
+
+		oidcConfigObject, diags := types.ObjectValueFrom(ctx, oidcConfig.attributeTypes(), oidcConfig)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		state.OIDC = oidcConfigObject
 	case response.Data.GoogleSAML != nil:
 		state.DisableEmailPasswordLogin = types.BoolValue(response.Data.GoogleSAML.DisableEmailPasswordLogin)
-		googleSAMLConfig := googleConfigModel{
+
+		// Fill Google config
+		googleConfig := googleConfigModel{
 			ClientID:              types.StringValue(response.Data.GoogleSAML.GoogleClientId),
 			EncryptedClientSecret: types.StringValue(response.Data.GoogleSAML.GoogleClientSecret),
 		}
-		googleSAMLConfig.ClientSecret = getSecretValue(
+		googleConfig.ClientSecret = getSecretValue(
 			ctx,
 			&resp.State,
-			googleSAMLConfig.EncryptedClientSecret,
+			googleConfig.EncryptedClientSecret,
 			path.Root("google").AtName("client_secret"),
 			path.Root("google").AtName("encrypted_client_secret"),
 			&resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		googleSAMLConfigObject, diags := types.ObjectValueFrom(ctx, googleSAMLConfig.attributeTypes(), googleSAMLConfig)
+		googleConfigObject, diags := types.ObjectValueFrom(ctx, googleConfig.attributeTypes(), googleConfig)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
 		}
-		state.Google = googleSAMLConfigObject
+		state.Google = googleConfigObject
+
+		// Fill SAML config
+		samlConfig := samlConfigModel{
+			IDPMetadataXML:            types.StringValue(response.Data.GoogleSAML.IdpMetadataXml),
+			FirstNameAttribute:        types.StringValue(response.Data.GoogleSAML.SamlFirstNameAttribute),
+			LastNameAttribute:         types.StringValue(response.Data.GoogleSAML.SamlLastNameAttribute),
+			GroupsAttribute:           types.StringPointerValue(response.Data.GoogleSAML.SamlGroupsAttribute),
+			SyncGroupClaims:           types.BoolValue(response.Data.GoogleSAML.SamlSyncGroupClaims),
+			LDAPSyncGroupClaims:       types.BoolValue(*response.Data.GoogleSAML.LdapSyncGroupClaims),
+			JITEnabled:                types.BoolValue(response.Data.GoogleSAML.JitEnabled),
+			TriggerLoginAutomatically: types.BoolValue(response.Data.GoogleSAML.TriggerLoginAutomatically),
+		}
+		if response.Data.GoogleSAML.LdapRoleMapping != nil {
+			rolesMapping := parseLdapRolesMappingValue(ctx, *response.Data.GoogleSAML.LdapRoleMapping)
+			rolesMappingTF := make(map[string]types.List, len(rolesMapping))
+			for key, value := range rolesMapping {
+				rolesMappingTF[key], diags = types.ListValueFrom(ctx, types.StringType, value)
+				resp.Diagnostics.Append(diags...)
+			}
+			samlConfig.RolesMapping, diags = types.MapValueFrom(ctx, types.MapType{ElemType: types.ListType{ElemType: types.StringType}}, rolesMappingTF)
+			resp.Diagnostics.Append(diags...)
+		} else {
+			samlConfig.RolesMapping = types.MapNull(types.MapType{ElemType: types.ListType{ElemType: types.StringType}})
+		}
+
+		if response.Data.GoogleSAML.RestrictedDomain != nil {
+			restrictedDomains := strings.Split(*response.Data.GoogleSAML.RestrictedDomain, ",")
+			samlConfig.RestrictedDomains, diags = types.ListValueFrom(ctx, types.StringType, restrictedDomains)
+			resp.Diagnostics.Append(diags...)
+		} else {
+			samlConfig.RestrictedDomains = types.ListNull(types.StringType)
+		}
+
+		var ldapConfig ldapConfigModel
+		if response.Data.GoogleSAML.LdapServerUrl != nil {
+			ldapConfig.ServerURL = types.StringValue(*response.Data.GoogleSAML.LdapServerUrl)
+		}
+		if response.Data.GoogleSAML.LdapBaseDomainComponents != nil {
+			ldapConfig.BaseDomainComponents = types.StringValue(*response.Data.GoogleSAML.LdapBaseDomainComponents)
+		}
+		if response.Data.GoogleSAML.LdapServerName != nil {
+			ldapConfig.ServerName = types.StringValue(*response.Data.GoogleSAML.LdapServerName)
+		}
+		if response.Data.GoogleSAML.LdapServerKey != nil {
+			ldapConfig.ServerKey = types.StringValue(*response.Data.GoogleSAML.LdapServerKey)
+		}
+		if response.Data.GoogleSAML.LdapServerCertificate != nil {
+			ldapConfig.ServerCertificate = types.StringValue(*response.Data.GoogleSAML.LdapServerCertificate)
+		}
+
+		ldapConfigObject, diags := types.ObjectValueFrom(ctx, ldapConfig.attributeTypes(), ldapConfig)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		samlConfig.LDAPConfig = ldapConfigObject
+
+		samlConfigObject, diags := types.ObjectValueFrom(ctx, samlConfig.attributeTypes(), samlConfig)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		state.SAML = samlConfigObject
 	case response.Data.OIDC != nil:
 		state.DisableEmailPasswordLogin = types.BoolValue(response.Data.OIDC.DisableEmailPasswordLogin)
 		oidcConfig := oidcConfigModel{
@@ -964,7 +1090,6 @@ func (r *ssoResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 		}
 
 		if response.Data.OIDC.RolesMapping != nil {
-			tflog.Info(ctx, "Roles mapping detected"+*response.Data.OIDC.RolesMapping)
 			roleMapTuples := strings.Split(*response.Data.OIDC.RolesMapping, ",")
 			rolesMapping := make(map[string]types.String, len(roleMapTuples))
 			for _, roleMapping := range roleMapTuples {
@@ -1014,10 +1139,10 @@ func (r *ssoResource) Read(ctx context.Context, req resource.ReadRequest, resp *
 				rolesMappingTF[key], diags = types.ListValueFrom(ctx, types.StringType, value)
 				resp.Diagnostics.Append(diags...)
 			}
-			samlConfig.RolesMapping, diags = types.MapValueFrom(ctx, types.ListType{ElemType: types.StringType}, rolesMappingTF)
+			samlConfig.RolesMapping, diags = types.MapValueFrom(ctx, types.MapType{ElemType: types.ListType{ElemType: types.StringType}}, rolesMappingTF)
 			resp.Diagnostics.Append(diags...)
 		} else {
-			samlConfig.RolesMapping = types.MapNull(types.ListType{ElemType: types.StringType})
+			samlConfig.RolesMapping = types.MapNull(types.MapType{ElemType: types.ListType{ElemType: types.StringType}})
 		}
 
 		if response.Data.SAML.RestrictedDomain != nil {
