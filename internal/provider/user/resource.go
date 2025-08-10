@@ -100,7 +100,7 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				},
 			},
 			"active": schema.BoolAttribute{
-				Optional:    false,
+				Optional:    true,
 				Description: "Whether the user is active or not. Defaults to true.",
 			},
 			"created_at": schema.StringAttribute{
