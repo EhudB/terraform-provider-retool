@@ -37,7 +37,7 @@ type userResourceModel struct {
 	ID                          types.String `tfsdk:"id"`
 	LegacyID                    types.String `tfsdk:"legacy_id"`
 	Email 					 	types.String `tfsdk:"email"`
-	Active          			types.Bool 	 `tfsdk:"acive"`
+	Active          			types.Bool 	 `tfsdk:"active"`
 	CreatedAt				  	types.String `tfsdk:"created_at"`
 	LastActive				  	types.String `tfsdk:"last_active"`
 	FirstName				  	types.String `tfsdk:"first_name"`
