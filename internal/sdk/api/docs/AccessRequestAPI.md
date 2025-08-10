@@ -102,7 +102,7 @@ import (
 
 func main() {
 	accessRequestId := "accessRequestId_example" // string | 
-	accessRequestsAccessRequestIdPatchRequest := *openapiclient.NewAccessRequestsAccessRequestIdPatchRequest([]openapiclient.UsersUserIdPatchRequestOperationsInnerAnyOf2{*openapiclient.NewUsersUserIdPatchRequestOperationsInnerAnyOf2("Op_example", "Path_example")}) // AccessRequestsAccessRequestIdPatchRequest |  (optional)
+	accessRequestsAccessRequestIdPatchRequest := *openapiclient.NewAccessRequestsAccessRequestIdPatchRequest([]openapiclient.ReplaceOperation{*openapiclient.NewReplaceOperation("Op_example", "Path_example")}) // AccessRequestsAccessRequestIdPatchRequest |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
